@@ -3,6 +3,7 @@
 import requests
 import json
 import os
+import yaml
 from ckanapi import RemoteCKAN
 
 
@@ -30,7 +31,7 @@ query_orcid = f"{filtering_method_orcid}:{orcid}"
 # Make the search API request
 response = requests.get(
     f"{ckan_url}/api/3/action/package_search",
-    params={"q": query},
+    params={"q": query_orcid},
     headers={"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
 )
 
@@ -44,7 +45,7 @@ print(len(dataset_ids))
 print(type(dataset_ids))
 print(dataset_ids)
 dataset_info_raw = response.json()['result']['results'] # returns a list of dicts(datasets)
-
+creator_name = dataset_info_raw[1]['creator']
 dois = []
 
 for i in range(len(dataset_info_raw)):
@@ -57,5 +58,13 @@ for i in range(len(dataset_info_raw)):
     dois.append(dict_item)
 
 # Create a file to store the results
-with open("scientist_datasets.json", "w") as file:
+with open(f"{creator_name}_datasets.json", "w") as file:
     json.dump(dois, file, indent=4)
+
+with open(f"{creator_name}_datasets.json", 'r') as json_file:
+    json_data = json.load(json_file)
+
+yaml_format = yaml.dump(json_data, default_flow_style=False)
+
+with open(f"{creator_name}_output_file.yaml", 'w') as yaml_file:
+    yaml_file.write(yaml_format)
