@@ -30,7 +30,7 @@ query_orcid = f"{filtering_method_orcid}:{orcid}"
 # Make the search API request
 response = requests.get(
     f"{ckan_url}/api/3/action/package_search",
-    params={"q": query_orcid},
+    params={"q": query},
     headers={"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
 )
 
@@ -43,30 +43,19 @@ dataset_ids = response.json()["result"]
 print(len(dataset_ids))
 print(type(dataset_ids))
 print(dataset_ids)
-
 dataset_info_raw = response.json()['result']['results'] # returns a list of dicts(datasets)
+
 dois = []
 
 for i in range(len(dataset_info_raw)):
     doi = dataset_info_raw[i]['identifier']
-    dois.append(doi)
-
-
-
-# Retrieve detailed information for each dataset
-# for dataset_id in dataset_ids:
-#     response = requests.get(
-#         f"{ckan_url}/api/3/action/package_show",
-#         params={"id": dataset_id},
-#         headers={"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
-#     )
-#     response.raise_for_status()
-
-#     dataset_info = response.json()
-#     print(f"Dataset Title: {dataset_info['title']}")
-#     # Access other relevant dataset details as needed
+    title = dataset_info_raw[i]['title']  
+    dict_item = {
+        "Dataset Title": title,
+        "DOI": doi
+    }
+    dois.append(dict_item)
 
 # Create a file to store the results
 with open("scientist_datasets.json", "w") as file:
-    # Save all dataset information in a JSON format
     json.dump(dois, file, indent=4)
